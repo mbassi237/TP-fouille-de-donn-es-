@@ -168,9 +168,9 @@ def AnalyseFrottis(request):
         if serializer.is_valid():
             frottis_instance = serializer.save(id_patient=patient)  # Enregistrement du frottis
 
-            # Lancement de l'analyse avec le modèle CNN
+            # Lancement de l'analyse avec le modèle CNN C:\Users\Neymar_Jr\Documents\Paludisme_projet\Backend
             image_path = frottis_instance.image.path
-            model_path = 'C:/Users/pc/Malaria_Detection/models3/shape_classifier.h5'
+            model_path = 'C:/Users/Neymar_Jr/Documents/Paludisme_projet/Backend/shape_classifier.h5'
             resultat_analyse = detection_malaria(image_path, model_path)
 
             # Mise à jour du frottis avec le statut obtenu

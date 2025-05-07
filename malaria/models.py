@@ -16,12 +16,12 @@ class Patient(models.Model):
 
 
 class Frottis(models.Model):
-    status = models.CharField(max_length=40)
+    status = models.CharField(max_length=255)
     image = models.ImageField()
     id_patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     
     def __str__(self):
-        return f"{self.status ({self.id_patient})}"
+        return f"{self.status} ({self.id_patient})"
 
 
 

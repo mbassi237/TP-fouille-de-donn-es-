@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'malaria',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,15 +79,33 @@ WSGI_APPLICATION = 'malariaDetection.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('name'),
+#         'USER': os.getenv('user'),
+#         'PASSWORD': os.getenv('password'),
+#         'HOST': os.getenv('host'),
+#         'PORT': os.getenv('port'),
+#         'OPTIONS': {'sslmode': 'require'},
+#     }
+# }
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5000",
+]
+
+# Database
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('name'),
-        'USER': os.getenv('user'),
-        'PASSWORD': os.getenv('password'),
-        'HOST': os.getenv('host'),
-        'PORT': os.getenv('port'),
-        'OPTIONS': {'sslmode': 'require'},
+        'NAME': 'paludisme',
+        'USER': 'postgres',
+        'PASSWORD': 'Pauline@1979',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 
