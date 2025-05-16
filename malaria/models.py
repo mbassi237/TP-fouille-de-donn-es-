@@ -19,6 +19,7 @@ class Frottis(models.Model):
     status = models.CharField(max_length=40)
     image = models.ImageField()
     id_patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    date = models.DateField(auto_now=True)
     
     def __str__(self):
         return f"{self.status ({self.id_patient})}"

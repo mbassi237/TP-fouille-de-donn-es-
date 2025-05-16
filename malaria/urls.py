@@ -17,7 +17,11 @@ from .views import (
     UpdatePatient,
     AnalyseFrottisSanguin,
     GetResultsPatient,
-    GetResultsPatientDetail
+    GetResultsPatientDetail,
+    GetNombrePatient,
+    PatientParSexe,
+    DerniersPatientAnalyser,
+    PatientParaziteNonParazite,
     )
 
 urlpatterns = [
@@ -38,4 +42,8 @@ urlpatterns = [
     path('analyse/', AnalyseFrottis, name='analyse-image'),
     path('getresults/', GetResultsPatient, name='get-results'),
     path('getresultdetail/<int:patient_id>/', GetResultsPatientDetail, name='get-result-detail'),
+    path('nombrepatient/', GetNombrePatient, name='nombre-patient'),
+    path('patientparsexe/', PatientParSexe, name='patient-sexe'),
+    path('analyserepartie/', PatientParaziteNonParazite, name='patient-parasite-non-parasite'),
+    path('derniereanalyse/', DerniersPatientAnalyser, name='dernieres-analyse'),
 ]

@@ -130,6 +130,54 @@ def GetResultsPatientDetail(request, patient_id):
         return Response({"message": "Resultats Patient non trouvé"}, status=status.HTTP_404_NOT_FOUND) 
 
 
+# Afficher le nombre de patients
+@api_view(['GET'])
+def GetNombrePatient(request):
+    patientcount = Patient.objects.count()
+    return Response({"Nombre de patients": patientcount})
+
+
+# Renvoit le nombre de patient parazite et non parazite a une date donnee
+@api_view(['GET'])
+def PatientParaziteNonParazite(request):
+    date_cible = request.GET.get('date')
+    if not date_cible:
+        return Response({"error": "Paramètre 'date' requis (format: YYYY-MM-DD)"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        patient_parasites = Frottis.objects.filter(status__iexact='Parasitized', date__date=date_cible).count()
+        patient_non_parasites = Frottis.objects.filter(status__iexact='Uninfected', date__date=date_cible).count()
+
+        return Response({
+            "date": date_cible,
+            "parasites": patient_parasites,
+            "non_parasites": patient_non_parasites
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+# ressortir les derniers patients ayant subit une analyse
+@api_view(['GET'])
+def DerniersPatientAnalyser(request):
+    # On récupère les 10 derniers frottis enregistrés
+    derniers_frottis = Frottis.objects.select_related('id_patient').order_by('-id')[:10]
+
+    serializer = FrottisSerializer(derniers_frottis, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def PatientParSexe(request):
+    patient_masculin = Patient.objects.filter(status__iexact='Masculin').count()
+    patient_feminin = Patient.objects.filter(status__iexact='Feminin').count()
+
+    return Response({
+        "masculin": patient_masculin,
+        "feminin": patient_feminin
+    })
 
 # fonction pour la detection du plasmodium avec le model CNN
 classnames = ['Parasitized', 'Uninfected']
