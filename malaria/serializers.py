@@ -14,7 +14,7 @@ class FrottisSerializer(serializers.ModelSerializer):
     code_patient = serializers.CharField(source='id_patient.code_patient', read_only=True)
     class Meta:
         model = Frottis
-        fields = ['status', 'nom_patient', 'code_patient', 'sexe', 'age']
+        fields = ['status', 'image', 'nom_patient', 'code_patient']
         extra_kwargs = {'status': {'required': False}}
 
 

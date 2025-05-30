@@ -25,6 +25,9 @@ from django.contrib import messages
 import os
 import json
 from django.http import HttpResponse, JsonResponse
+from rest_framework import status as drf_status
+from datetime import datetime
+import ast
 # Create your views here.
 
 
@@ -140,22 +143,52 @@ def GetNombrePatient(request):
 # Renvoit le nombre de patient parazite et non parazite a une date donnee
 @api_view(['GET'])
 def PatientParaziteNonParazite(request):
-    date_cible = request.GET.get('date')
-    if not date_cible:
-        return Response({"error": "Paramètre 'date' requis (format: YYYY-MM-DD)"}, status=status.HTTP_400_BAD_REQUEST)
-    
+    date_cible_str = request.GET.get('date')
+
+    if not date_cible_str:
+        return Response(
+            {"error": "Paramètre 'date' requis (format: YYYY-MM-DD)"},
+            status=drf_status.HTTP_400_BAD_REQUEST
+        )
+
     try:
-        patient_parasites = Frottis.objects.filter(status__iexact='Parasitized', date__date=date_cible).count()
-        patient_non_parasites = Frottis.objects.filter(status__iexact='Uninfected', date__date=date_cible).count()
+        # Conversion de la date string vers date Python
+        date_cible = datetime.strptime(date_cible_str, "%Y-%m-%d").date()
+    except ValueError:
+        return Response(
+            {"error": "Format de date invalide. Utilisez YYYY-MM-DD."},
+            status=drf_status.HTTP_400_BAD_REQUEST
+        )
 
-        return Response({
-            "date": date_cible,
-            "parasites": patient_parasites,
-            "non_parasites": patient_non_parasites
-        })
+    parasites = 0
+    non_parasites = 0
 
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # Récupération des frottis de cette date
+    frottis_list = Frottis.objects.filter(date=date_cible)
+
+    for frottis in frottis_list:
+        try:
+            # Conversion du string en dict sécurisé
+            status_dict = ast.literal_eval(frottis.status)
+            if not isinstance(status_dict, dict):
+                continue
+
+            parasitized_score = status_dict.get("Parasitized", 0)
+            uninfected_score = status_dict.get("Uninfected", 0)
+
+            if parasitized_score > uninfected_score:
+                parasites += 1
+            else:
+                non_parasites += 1
+
+        except (ValueError, SyntaxError):
+            continue  # Ignore les status invalides
+
+    return Response({
+        "date": date_cible_str,
+        "parasites": parasites,
+        "non_parasites": non_parasites
+    })
 
 
 
@@ -169,10 +202,11 @@ def DerniersPatientAnalyser(request):
     return Response(serializer.data)
 
 
+# nombre de patient par sexe
 @api_view(['GET'])
 def PatientParSexe(request):
-    patient_masculin = Patient.objects.filter(status__iexact='Masculin').count()
-    patient_feminin = Patient.objects.filter(status__iexact='Feminin').count()
+    patient_masculin = Patient.objects.filter(sexe__iexact='Masculin').count()
+    patient_feminin = Patient.objects.filter(sexe__iexact='Feminin').count()
 
     return Response({
         "masculin": patient_masculin,
