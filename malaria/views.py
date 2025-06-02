@@ -196,7 +196,7 @@ def PatientParaziteNonParazite(request):
 @api_view(['GET'])
 def DerniersPatientAnalyser(request):
     # On récupère les 10 derniers frottis enregistrés
-    derniers_frottis = Frottis.objects.select_related('id_patient').order_by('-id')[:10]
+    derniers_frottis = Frottis.objects.select_related('id_patient').order_by('-date')[:10]
 
     serializer = FrottisSerializer(derniers_frottis, many=True)
     return Response(serializer.data)
