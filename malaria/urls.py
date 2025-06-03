@@ -22,6 +22,9 @@ from .views import (
     PatientParSexe,
     DerniersPatientAnalyser,
     PatientParaziteNonParazite,
+    EvolutionMensuelleParasites,
+    RepartitionParSexeParasites,
+    TotalAnalyseEffectuees,
     )
 
 urlpatterns = [
@@ -46,4 +49,7 @@ urlpatterns = [
     path('patientparsexe/', PatientParSexe, name='patient-sexe'),
     path('analyserepartie/', PatientParaziteNonParazite, name='patient-parasite-non-parasite'),
     path('derniereanalyse/', DerniersPatientAnalyser, name='dernieres-analyse'),
+    path('evolutionmensuelleparasite/', EvolutionMensuelleParasites, name='evolution-parasite'),
+    path('repartitionsexeparasite/', RepartitionParSexeParasites, name='repartion-sexe-parasite'),
+    path('totalanalyse/', TotalAnalyseEffectuees, name='total-analyse'),
 ]

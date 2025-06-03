@@ -28,6 +28,7 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework import status as drf_status
 from datetime import datetime
 import ast
+from collections import defaultdict
 # Create your views here.
 
 
@@ -200,6 +201,69 @@ def DerniersPatientAnalyser(request):
 
     serializer = FrottisSerializer(derniers_frottis, many=True)
     return Response(serializer.data)
+
+
+
+# Diagramme en courbe (en ligne)
+@api_view(['GET'])
+def EvolutionMensuelleParasites(request):
+    frottis_list = Frottis.objects.exclude(status__isnull=True)
+
+    # Dictionnaire pour stocker les compteurs par mois
+    stats = defaultdict(int)
+
+    for frottis in frottis_list:
+        try:
+            status_dict = ast.literal_eval(frottis.status)
+            parasitized = status_dict.get('Parasitized', 0)
+            uninfected = status_dict.get('Uninfected', 0)
+
+            # Considérer comme parasité si Parasitized > Uninfected
+            if parasitized > uninfected and frottis.date:
+                mois = frottis.date.strftime('%Y-%m')  # Format AAAA-MM
+                stats[mois] += 1
+
+        except Exception as e:
+            continue  # ignorer les erreurs de parsing
+
+    # Trier les mois par ordre chronologique
+    resultats = dict(sorted(stats.items()))
+
+    return Response(resultats)
+
+
+# Diagramme en barre
+@api_view(['GET'])
+def RepartitionParSexeParasites(request):
+    try:
+        # Dictionnaire pour stocker le nombre de cas parasités par sexe
+        stats = defaultdict(int)
+
+        # On parcourt tous les frottis analysés
+        frottis_list = Frottis.objects.exclude(status__isnull=True).select_related('id_patient')
+
+        for frottis in frottis_list:
+            try:
+                status_dict = ast.literal_eval(frottis.status)
+
+                if status_dict.get('Parasitized', 0) > status_dict.get('Uninfected', 0):
+                    sexe = frottis.id_patient.sexe  # Récupérer le sexe depuis le lien vers le patient
+                    stats[sexe] += 1
+            except Exception as e:
+                # En cas d'erreur de conversion, on ignore cette ligne
+                continue
+
+        return Response(stats)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Total des analyses effectuees
+@api_view(['GET'])
+def TotalAnalyseEffectuees(request):
+    analysecount = Frottis.objects.count()
+    return Response({"Nombre d'analyse effectuees": analysecount})
 
 
 # nombre de patient par sexe
