@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import generics
 from rest_framework.decorators import api_view
@@ -277,6 +276,40 @@ def PatientParSexe(request):
         "feminin": patient_feminin
     })
 
+
+# Diagramme en barre pour la repartition des patients infectes par tranche d'age
+@api_view(['GET'])
+def PatientsInfectesTrancheAge(request):
+    # Tranches d’âge sous forme de tuples (min, max)
+    tranches = [(0, 10), (10, 20), (20, 30), (30, 40), (40, 50),
+                (50, 60), (60, 70), (70, 80), (80, 90), (90, 100)]
+
+    # Initialiser les stats par tranche d’âge
+    stats = {f"{t[0]}-{t[1]}": 0 for t in tranches}
+
+    # Parcourir tous les frottis avec un status non null
+    frottis_list = Frottis.objects.exclude(status__isnull=True).select_related('id_patient')
+
+    for frottis in frottis_list:
+        try:
+            status_dict = ast.literal_eval(frottis.status)
+            parasitized = status_dict.get('Parasitized', 0)
+            uninfected = status_dict.get('Uninfected', 0)
+
+            if parasitized > uninfected:
+                age = frottis.id_patient.age  # suppose que age est un champ dans Patient
+                for (min_age, max_age) in tranches:
+                    if min_age <= age < max_age:
+                        key = f"{min_age}-{max_age}"
+                        stats[key] += 1
+                        break
+        except Exception:
+            continue  # on ignore les erreurs de parsing ou d’accès à l’âge
+
+    return Response(stats)
+    
+
+
 # fonction pour la detection du plasmodium avec le model CNN
 classnames = ['Parasitized', 'Uninfected']
 def detection_malaria(image_path, model_path):
@@ -379,33 +412,3 @@ def GenererRapport(request):
     
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename=f"rapport_{patient.nom}.pdf")
-
-
-
-
-def HomePage(request):
-    return render(request, 'doameki/master.html')
-
-
-def PatientFormulaire(request):
-    return render(request, 'doameki/patientformulaire.html')
-
-
-def AuthRegister(request):
-    return render(request, 'doameki/auth-register.html')
-
-
-def AuthLogin(request):
-    return render(request, 'doameki/auth-login.html')
-
-
-def AuthRecover(request):
-    return render(request, 'doameki/auth-recover-pw.html')
-
-
-def Dashboard(request):
-    return render(request, 'doameki/dashboard.html')
-
-
-def AnalyseFrottisSanguin(request):
-    return render(request, 'doameki/analyse-frottis.html')
