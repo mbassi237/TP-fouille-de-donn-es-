@@ -28,6 +28,8 @@ from rest_framework import status as drf_status
 from datetime import datetime
 import ast
 from collections import defaultdict
+from reportlab.lib.pagesizes import A5  # Réduction de la taille du PDF
+from reportlab.lib.units import mm 
 # Create your views here.
 
 
@@ -390,25 +392,29 @@ def GenererRapport(request):
 
     # En-tête du rapport
     p.setFont("Helvetica-Bold", 16)
-    p.drawString(200, 770, "Rapport d'analyse Frottis")
-    p.line(100, 760, 500, 760)  # Ligne de séparation
+    p.drawString(100, 770, "Examen de Paludisme: Diagnostique du frottis sanguin")
+    p.line(100, 765, 520, 765)  # Ligne de séparation
 
+    p.setFont("Helvetica-Bold", 13)
+    p.drawString(100, 730, f"Date de l'analyse: {frottis.date}")
+    
     # Informations du patient
     p.setFont("Helvetica", 12)
-    p.drawString(100, 730, f"Nom: {patient.nom}")
-    p.drawString(100, 710, f"Identifiant: {patient.code_patient}")
-    p.drawString(100, 690, f"Sexe: {patient.sexe}")
-    p.drawString(100, 670, f"Âge: {patient.age} ans")
+    p.drawString(100, 700, f"Code Patient: {patient.code_patient}")
+    p.drawString(100, 680, f"Nom: {patient.nom}")
+    p.drawString(100, 660, f"Âge: {patient.age} ans")
+    p.drawString(100, 640, f"Sexe: {patient.sexe}")
+
     
     # Résultat de l'analyse
     p.setFont("Helvetica-Bold", 14)
-    p.drawString(100, 640, "🔍 Résultats de l'analyse :")
+    p.drawString(100, 610, "Résultats de l'analyse :")
     p.setFont("Helvetica", 12)
-    p.drawString(100, 620, f"Statut du frottis : {frottis.status}")
+    p.drawString(100, 590, f"Statut du frottis : {frottis.status}")
 
     # Finalisation du PDF
     p.showPage()
     p.save()
     
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename=f"rapport_{patient.nom}.pdf")
+    return FileResponse(buffer, as_attachment=True, filename=f"rapport_{patient.nom}.pdf", content_type="application/pdf")

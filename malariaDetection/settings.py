@@ -13,9 +13,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv()
+load_dotenv(encoding='utf-8')
 URL_V = os.getenv('verify_url')
 URL_B = os.getenv('base_url')
 
@@ -28,7 +29,7 @@ SECRET_KEY = 'django-insecure-2og%622z5q^@2x%sw1h=m%7%bl7pu(6f(&lh40lp*&z(erkj*h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*", "https://doameki.onrender.com"]
 
 
 # Application definition
@@ -87,7 +88,6 @@ WSGI_APPLICATION = 'malariaDetection.wsgi.application'
         'PASSWORD': os.getenv('password'),
         'HOST': os.getenv('host'),
         'PORT': os.getenv('port'),
-        'OPTIONS': {'sslmode': 'require'},
     }
 }'''
 
@@ -101,6 +101,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
 
 
 CORS_ALLOWED_ORIGINS = [
