@@ -410,7 +410,25 @@ def GenererRapport(request):
     p.setFont("Helvetica-Bold", 14)
     p.drawString(100, 610, "Résultats de l'analyse :")
     p.setFont("Helvetica", 12)
-    p.drawString(100, 590, f"Statut du frottis : {frottis.status}")
+
+    # Interprétation du status JSON
+    try:
+        status_dict = ast.literal_eval(frottis.status)  # transforme la chaîne en dict
+        parasitized = status_dict.get('Parasitized', 0)
+        uninfected = status_dict.get('Uninfected', 0)
+
+        if parasitized > uninfected:
+            diagnostic = f"Positif au paludisme à {parasitized * 100:.1f}%"
+        elif uninfected > parasitized:
+            diagnostic = f"Négatif au paludisme à {uninfected * 100:.1f}%"
+        else:
+            diagnostic = "Analyse équivoque, veuillez recontrôler."
+
+    except Exception as e:
+        diagnostic = f"Erreur dans les données du frottis : {str(e)}"
+
+    # Affichage dans le PDF
+    p.drawString(100, 590, f"Diagnostic : {diagnostic}")
 
     # Finalisation du PDF
     p.showPage()
